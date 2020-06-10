@@ -5,20 +5,24 @@
 
 package software.bernie.geckolib.example.entity;
 
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.WaterMobEntity;
+import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.world.World;
 import software.bernie.geckolib.animation.model.AnimationController;
 import software.bernie.geckolib.animation.model.AnimationControllerCollection;
 import software.bernie.geckolib.entity.IAnimatedEntity;
 import software.bernie.geckolib.animation.*;
 
-public class StingrayTestEntity extends WaterMobEntity implements IAnimatedEntity
+public class StingrayTestEntity extends EntityMob implements IAnimatedEntity
 {
 	public AnimationControllerCollection animationControllers = new AnimationControllerCollection();
 	private AnimationController wingController = new AnimationController(this, "wingController", 1, this::wingAnimationPredicate);
+
+	public StingrayTestEntity(World worldIn)
+	{
+		super(worldIn);
+		registerAnimationControllers();
+	}
 
 	@Override
 	public AnimationControllerCollection getAnimationControllers()
@@ -26,12 +30,7 @@ public class StingrayTestEntity extends WaterMobEntity implements IAnimatedEntit
 		return animationControllers;
 	}
 
-	public StingrayTestEntity(EntityType<? extends WaterMobEntity> p_i48565_1_, World p_i48565_2_)
-	{
-		super(p_i48565_1_, p_i48565_2_);
-		this.registerAnimationControllers();
 
-	}
 
 	public void registerAnimationControllers()
 	{
@@ -45,7 +44,7 @@ public class StingrayTestEntity extends WaterMobEntity implements IAnimatedEntit
 	public boolean wingAnimationPredicate(AnimationTestEvent event)
 	{
 		Entity entity = event.getEntity();
-		ClientWorld entityWorld = (ClientWorld) entity.getEntityWorld();
+		World entityWorld = entity.getEntityWorld();
 		if(entityWorld.rainingStrength > 0)
 		{
 			wingController.transitionLength = 40;

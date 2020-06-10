@@ -8,9 +8,9 @@ package software.bernie.geckolib.file;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.IReloadableResourceManager;
-import net.minecraft.resources.SimpleResource;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.client.resources.IReloadableResourceManager;
+import net.minecraft.client.resources.SimpleResource;
+import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -35,10 +35,10 @@ public class AnimationFileManager
 	private JsonObject loadAnimationFile(ResourceLocation location) throws Exception
 	{
 		Gson GSON = new Gson();
-		IReloadableResourceManager resourceManager = (IReloadableResourceManager) Minecraft.getInstance().getResourceManager();
+		IReloadableResourceManager resourceManager = (IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager();
 		SimpleResource resource = (SimpleResource) resourceManager.getResource(location);
 		Reader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
-		JsonObject jsonobject = JSONUtils.fromJson(GSON, reader, JsonObject.class);
+		JsonObject jsonobject = JsonUtils.fromJson(GSON, reader, JsonObject.class);
 		resource.close();
 		return jsonobject;
 	}

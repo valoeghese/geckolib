@@ -6,8 +6,7 @@
 package software.bernie.geckolib.example.entity;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.monster.GhastEntity;
+import net.minecraft.entity.monster.EntityGhast;
 import net.minecraft.world.World;
 import software.bernie.geckolib.GeckoLib;
 import software.bernie.geckolib.animation.SoundEvent;
@@ -18,10 +17,16 @@ import software.bernie.geckolib.animation.model.AnimationControllerCollection;
 import software.bernie.geckolib.animation.AnimationTestEvent;
 import software.bernie.geckolib.example.KeyboardHandler;
 
-public class TigrisEntity extends GhastEntity implements IAnimatedEntity
+public class TigrisEntity extends EntityGhast implements IAnimatedEntity
 {
 	public AnimationControllerCollection animationControllers = new AnimationControllerCollection();
 	private AnimationController moveController = new AnimationController(this, "moveController", 10F, this::moveController);
+
+	public TigrisEntity(World worldIn)
+	{
+		super(worldIn);
+		registerAnimationControllers();
+	}
 
 	private <ENTITY extends Entity> boolean moveController(AnimationTestEvent<ENTITY> entityAnimationTestEvent)
 	{
@@ -36,11 +41,6 @@ public class TigrisEntity extends GhastEntity implements IAnimatedEntity
 		return true;
 	}
 
-	public TigrisEntity(EntityType<? extends GhastEntity> type, World worldIn)
-	{
-		super(type, worldIn);
-		registerAnimationControllers();
-	}
 
 	@Override
 	public AnimationControllerCollection getAnimationControllers()

@@ -7,9 +7,10 @@ package software.bernie.geckolib.animation.model;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.util.JSONException;
+import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.util.JsonException;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
 import software.bernie.geckolib.GeckoLib;
 import software.bernie.geckolib.animation.keyframe.AnimationPoint;
@@ -25,13 +26,13 @@ import java.util.List;
  *
  * @param <T> the type parameter
  */
-public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> extends EntityModel<T>
+public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> extends ModelBase
 {
 	private JsonObject animationFile;
 	private AnimationFileManager animationFileManager;
 	private List<AnimatedModelRenderer> modelRendererList = new ArrayList();
 	private HashMap<String, Animation> animationList = new HashMap();
-
+	public List<AnimatedModelRenderer> rootBones = new ArrayList<>();
 	/**
 	 * This resource location needs to point to a json file of your animation file, i.e. "geckolib:animations/frog_animation.json"
 	 *
@@ -78,7 +79,7 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 					animation.loop = true;
 				}
 			}
-			catch (JSONException e)
+			catch (JsonException e)
 			{
 				GeckoLib.LOGGER.error("Could not load animation: " + animationName, e);
 			}
@@ -145,9 +146,9 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 	 *
 	 * @param name The name
 	 * @return the animation by name
-	 * @throws JSONException
+	 * @throws JsonException
 	 */
-	public Map.Entry<String, JsonElement> getAnimationByName(String name) throws JSONException
+	public Map.Entry<String, JsonElement> getAnimationByName(String name) throws JsonException
 	{
 		return JSONAnimationUtils.getAnimation(getAnimationFile(), name);
 	}
@@ -168,9 +169,11 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 		modelRenderer.rotateAngleZ = z;
 	}
 
+
 	@Override
-	public void setLivingAnimations(T entity, float limbSwing, float limbSwingAmount, float partialTick)
+	public void setLivingAnimations(EntityLivingBase entityIn, float limbSwing, float limbSwingAmount, float partialTick)
 	{
+		T entity = (T) entityIn;
 		// Keeps track of which bones have had animations applied to them, and eventually sets the ones that don't have an animation to their default values
 		EntityDirtyTracker modelTracker = createNewDirtyTracker();
 
@@ -313,12 +316,6 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 		return collection;
 	}
 
-	@Override
-	public void setRotationAngles(T entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch)
-	{
-
-	}
-
 	/**
 	 * Gets animation.
 	 *
@@ -350,4 +347,14 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 
 		return (float) (currentValue + increment);
 	}
+
+	@Override
+	public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale)
+	{
+		for(AnimatedModelRenderer model : rootBones)
+		{
+			model.render(scale);
+		}
+	}
+
 }

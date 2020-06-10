@@ -6,13 +6,12 @@
 package software.bernie.geckolib.animation.model;
 
 import net.minecraft.entity.Entity;
-import org.antlr.v4.runtime.misc.NotNull;
-import org.apache.commons.lang3.ArrayUtils;
-import org.codehaus.plexus.util.CollectionUtils;
 import software.bernie.geckolib.GeckoLib;
 import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.animation.keyframe.*;
 import software.bernie.geckolib.entity.IAnimatedEntity;
+
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -321,7 +320,7 @@ public class AnimationController<T extends Entity & IAnimatedEntity>
 	}
 
 	// At the beginning of a new transition, save a snapshot of the model's rotation, position, and scale values as the initial value to lerp from
-	private void saveSnapshotsForAnimation(@NotNull Animation animation, BoneSnapshotCollection boneSnapshotCollection)
+	private void saveSnapshotsForAnimation(@Nonnull Animation animation, BoneSnapshotCollection boneSnapshotCollection)
 	{
 		for (BoneSnapshot snapshot : boneSnapshotCollection.values())
 		{
