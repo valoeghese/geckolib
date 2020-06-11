@@ -63,6 +63,7 @@ public class AnimatedModelRenderer extends ModelRenderer
 				}
 
 				GlStateManager.translate(this.offsetX, this.offsetY, this.offsetZ);
+				GlStateManager.scale(scaleValueX, scaleValueY, scaleValueZ);
 
 				if (this.rotateAngleX == 0.0F && this.rotateAngleY == 0.0F && this.rotateAngleZ == 0.0F)
 				{
@@ -116,7 +117,6 @@ public class AnimatedModelRenderer extends ModelRenderer
 					{
 						GlStateManager.rotate(this.rotateAngleX * (180F / (float) Math.PI), 1.0F, 0.0F, 0.0F);
 					}
-					GlStateManager.scale(scaleValueX, scaleValueY, scaleValueZ);
 
 					GlStateManager.callList(this.displayList);
 

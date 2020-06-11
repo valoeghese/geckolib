@@ -7,6 +7,7 @@ package software.bernie.geckolib.animation.model;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.util.JsonException;
 import net.minecraft.entity.Entity;
@@ -260,7 +261,6 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 			AnimatedModelRenderer model = tracker.model;
 			BoneSnapshot initialSnapshot = model.getInitialSnapshot();
 			BoneSnapshot saveSnapshot = boneSnapshots.get(tracker.model.name);
-
 			if (!tracker.hasRotationChanged)
 			{
 				model.rotateAngleX = lerpConstant(saveSnapshot.rotationValueX, initialSnapshot.rotationValueX, 0.02);
@@ -281,11 +281,6 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 			}
 			if (!tracker.hasScaleChanged)
 			{
-				if(tracker.model.name.equals("Righthand"))
-				{
-					int sdf = 0;
-					//GeckoLib.LOGGER.info(model.rotateAngleX);
-				}
 				model.scaleValueX = lerpConstant(saveSnapshot.scaleValueX, initialSnapshot.scaleValueX, 0.02);
 				model.scaleValueY = lerpConstant(saveSnapshot.scaleValueY, initialSnapshot.scaleValueY, 0.02);
 				model.scaleValueZ = lerpConstant(saveSnapshot.scaleValueZ, initialSnapshot.scaleValueZ, 0.02);
