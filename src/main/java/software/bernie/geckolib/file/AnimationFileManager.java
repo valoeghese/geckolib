@@ -14,6 +14,7 @@ import net.minecraft.resource.ReloadableResourceManager;
 import net.minecraft.resource.ResourceImpl;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
+import software.bernie.geckolib.GeckoLib;
 
 /**
  * An animation file manager is responsible for reading animation json files.
@@ -35,12 +36,15 @@ public class AnimationFileManager
 	private JsonObject loadAnimationFile(Identifier location) throws Exception
 	{
 		Gson GSON = new Gson();
-		ReloadableResourceManager resourceManager = (ReloadableResourceManager) MinecraftClient.getInstance().getResourceManager();
-		ResourceImpl resource = (ResourceImpl) resourceManager.getResource(location);
-		Reader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
+		InputStream inputStream = getStreamForResourceLocation(location);
+		Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 		JsonObject jsonobject = JsonHelper.deserialize(GSON, reader, JsonObject.class);
-		resource.close();
 		return jsonobject;
+	}
+
+
+	public InputStream getStreamForResourceLocation(Identifier resourceLocation) {
+		return new BufferedInputStream(GeckoLib.class.getResourceAsStream("/assets/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath()));
 	}
 
 	/**

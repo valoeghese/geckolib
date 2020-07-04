@@ -5,6 +5,7 @@
 
 package software.bernie.geckolib.example.entity;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.LookAroundGoal;
@@ -23,7 +24,6 @@ import software.bernie.geckolib.animation.AnimationBuilder;
 import software.bernie.geckolib.animation.model.AnimationController;
 import software.bernie.geckolib.animation.model.AnimationControllerCollection;
 import software.bernie.geckolib.animation.AnimationTestEvent;
-import software.bernie.geckolib.example.KeyboardHandler;
 
 public class AscendedLegfishEntity extends HostileEntity implements IAnimatedEntity
 {
@@ -37,12 +37,15 @@ public class AscendedLegfishEntity extends HostileEntity implements IAnimatedEnt
 	private <ENTITY extends Entity> boolean moveController(AnimationTestEvent<ENTITY> entityAnimationTestEvent)
 	{
 		float limbSwingAmount = entityAnimationTestEvent.getLimbSwingAmount();
-		if(KeyboardHandler.isForwardKeyDown)
+		boolean isForwardKeyDown = MinecraftClient.getInstance().options.keyForward.isPressed();
+		boolean isBackKeyDown = MinecraftClient.getInstance().options.keyBack.isPressed();
+
+		if(isForwardKeyDown)
 		{
 			moveControl.setAnimation(new AnimationBuilder().addAnimation("kick", true));
 			return true;
 		}
-		else if(KeyboardHandler.isBackKeyDown)
+		else if(isBackKeyDown)
 		{
 			moveControl.setAnimation(new AnimationBuilder().addAnimation("punchwalk", true));
 			return true;

@@ -18,6 +18,7 @@ import software.bernie.geckolib.animation.keyframe.AnimationPoint;
 import software.bernie.geckolib.entity.IAnimatedEntity;
 import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.file.AnimationFileManager;
+import software.bernie.geckolib.forgetofabric.ResourceLocation;
 import software.bernie.geckolib.json.JSONAnimationUtils;
 import java.util.*;
 
@@ -39,7 +40,7 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 	 *
 	 * @return the animation file location
 	 */
-	public abstract Identifier getAnimationFileLocation();
+	public abstract ResourceLocation getAnimationFileLocation();
 
 	/**
 	 * If animations should loop by default and ignore their pre-existing loop settings (that you can enable in blockbench by right clicking)
@@ -147,7 +148,6 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 	 *
 	 * @param name The name
 	 * @return the animation by name
-	 * @throws JSONException
 	 */
 	public Map.Entry<String, JsonElement> getAnimationByName(String name) throws ShaderParseException
 	{
@@ -356,4 +356,6 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 			model.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 		}
 	}
+
+
 }

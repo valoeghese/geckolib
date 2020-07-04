@@ -5,6 +5,7 @@
 
 package software.bernie.geckolib.example.entity;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.GhastEntity;
@@ -16,7 +17,6 @@ import software.bernie.geckolib.animation.AnimationBuilder;
 import software.bernie.geckolib.animation.model.AnimationController;
 import software.bernie.geckolib.animation.model.AnimationControllerCollection;
 import software.bernie.geckolib.animation.AnimationTestEvent;
-import software.bernie.geckolib.example.KeyboardHandler;
 
 public class TigrisEntity extends GhastEntity implements IAnimatedEntity
 {
@@ -25,13 +25,14 @@ public class TigrisEntity extends GhastEntity implements IAnimatedEntity
 
 	private <ENTITY extends Entity> boolean moveController(AnimationTestEvent<ENTITY> entityAnimationTestEvent)
 	{
-		moveControl.transitionLength = 10;
-		if(KeyboardHandler.isQDown)
+		boolean isQDown = MinecraftClient.getInstance().options.keyDrop.isPressed();
+		moveController.transitionLength = 10;
+		if(isQDown)
 		{
-			moveControl.setAnimation(new AnimationBuilder().addAnimation("spit.fly", false).addAnimation("sit", false).addAnimation("sit", false).addAnimation("run", false).addAnimation("run", false).addAnimation("sleep", true));
+			moveController.setAnimation(new AnimationBuilder().addAnimation("spit.fly", false).addAnimation("sit", false).addAnimation("sit", false).addAnimation("run", false).addAnimation("run", false).addAnimation("sleep", true));
 		}
 		else {
-			moveControl.setAnimation(new AnimationBuilder().addAnimation("fly", true));
+			moveController.setAnimation(new AnimationBuilder().addAnimation("fly", true));
 		}
 		return true;
 	}
@@ -52,8 +53,8 @@ public class TigrisEntity extends GhastEntity implements IAnimatedEntity
 	{
 		if(world.isClient)
 		{
-			this.animationControllers.addAnimationController(moveControl);
-			moveControl.registerSoundListener(this::moveSoundListener);
+			this.animationControllers.addAnimationController(moveController);
+			moveController.registerSoundListener(this::moveSoundListener);
 		}
 	}
 
