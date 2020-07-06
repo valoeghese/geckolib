@@ -468,7 +468,7 @@ public class AnimationController<T extends Entity & IAnimatedEntity>
 
 	private void resetEventKeyFrames(Animation animation)
 	{
-		if(!animation.soundKeyFrames.isEmpty())
+		if(animation != null && animation.soundKeyFrames != null && !animation.soundKeyFrames.isEmpty())
 		{
 			for(EventKeyFrame soundKeyFrame : animation.soundKeyFrames)
 			{
