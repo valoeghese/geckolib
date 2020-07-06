@@ -297,6 +297,6 @@ public class TigrisModel extends AnimatedEntityModel<TigrisEntity>
 	@Override
 	public ResourceLocation getAnimationFileLocation()
 	{
-		return new ResourceLocation("geckolib:" + "animations/tigris_anim.json");
+		return new ResourceLocation("geckolib", "animations/tigris_anim.json");
 	}
 }
