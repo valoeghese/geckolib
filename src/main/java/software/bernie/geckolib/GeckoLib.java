@@ -16,7 +16,7 @@ public class GeckoLib
 	public static final Logger LOGGER = LogManager.getLogger();
 	public static final String ModID = "geckolib";
 	public static final String NAME = "GeckoLib";
-	public static final String VERSION = "1.0.0";
+	public static final String VERSION = "1.0.1";
 
 	public GeckoLib()
 	{
