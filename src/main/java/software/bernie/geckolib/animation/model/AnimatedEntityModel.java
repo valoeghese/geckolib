@@ -284,6 +284,10 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 				model.scaleValueX = lerpConstant(saveSnapshot.scaleValueX, initialSnapshot.scaleValueX, 0.02);
 				model.scaleValueY = lerpConstant(saveSnapshot.scaleValueY, initialSnapshot.scaleValueY, 0.02);
 				model.scaleValueZ = lerpConstant(saveSnapshot.scaleValueZ, initialSnapshot.scaleValueZ, 0.02);
+				if(model.name.equals("teeth2"))
+				{
+					//model.scaleValueY = 0.3f;
+				}
 				saveSnapshot.scaleValueX = model.scaleValueX;
 				saveSnapshot.scaleValueY = model.scaleValueY;
 				saveSnapshot.scaleValueZ = model.scaleValueZ;

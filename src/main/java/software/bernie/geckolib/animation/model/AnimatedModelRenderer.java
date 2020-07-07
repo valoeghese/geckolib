@@ -5,10 +5,13 @@
 
 package software.bernie.geckolib.animation.model;
 
+import com.google.common.collect.Lists;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBox;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
+
+import java.util.List;
 
 public class AnimatedModelRenderer extends ModelRenderer
 {
@@ -25,12 +28,22 @@ public class AnimatedModelRenderer extends ModelRenderer
 
 	public String name;
 	public BoneSnapshot initialSnapshot;
+	public List<AnimatedModelRenderer> childModelsAnimated;
 
 	public AnimatedModelRenderer(ModelBase model)
 	{
 		super(model);
 	}
 
+	public void addChild(AnimatedModelRenderer renderer)
+	{
+		if (this.childModelsAnimated == null)
+		{
+			this.childModelsAnimated = Lists.<AnimatedModelRenderer>newArrayList();
+		}
+
+		this.childModelsAnimated.add(renderer);
+	}
 
 	public void setModelRendererName(String modelRendererName)
 	{
@@ -44,8 +57,10 @@ public class AnimatedModelRenderer extends ModelRenderer
 		return this;
 	}
 
-	public void addBox(float x, float y, float z, float dx, float dy, float dz, float inflate, boolean mirror){
-		ModelBox box = new ModelBox(this, this.textureOffsetX, this.textureOffsetY, x, y, z, Math.round(dx), Math.round(dy), Math.round(dz), inflate, mirror);
+	public void addBox(float x, float y, float z, float dx, float dy, float dz, float inflate, boolean mirror)
+	{
+		ModelBox box = new ModelBox(this, this.textureOffsetX, this.textureOffsetY, x, y, z, Math.round(dx),
+				Math.round(dy), Math.round(dz), inflate, mirror);
 		this.cubeList.add(box);
 
 	}
@@ -63,73 +78,40 @@ public class AnimatedModelRenderer extends ModelRenderer
 				}
 
 				GlStateManager.translate(this.offsetX, this.offsetY, this.offsetZ);
+
+				GlStateManager.pushMatrix();
+
+				GlStateManager.translate(((rotationPointX + positionOffsetX) / 16F),
+						((rotationPointY - positionOffsetY) / 16F),
+						((rotationPointZ + positionOffsetZ) / 16F));
 				GlStateManager.scale(scaleValueX, scaleValueY, scaleValueZ);
 
-				if (this.rotateAngleX == 0.0F && this.rotateAngleY == 0.0F && this.rotateAngleZ == 0.0F)
+				if (this.rotateAngleZ != 0.0F)
 				{
-					if (this.rotationPointX == 0.0F && this.rotationPointY == 0.0F && this.rotationPointZ == 0.0F)
+					GlStateManager.rotate(this.rotateAngleZ * (180F / (float) Math.PI), 0.0F, 0.0F, 1.0F);
+				}
+
+				if (this.rotateAngleY != 0.0F)
+				{
+					GlStateManager.rotate(this.rotateAngleY * (180F / (float) Math.PI), 0.0F, 1.0F, 0.0F);
+				}
+
+				if (this.rotateAngleX != 0.0F)
+				{
+					GlStateManager.rotate(this.rotateAngleX * (180F / (float) Math.PI), 1.0F, 0.0F, 0.0F);
+				}
+
+				GlStateManager.callList(this.displayList);
+
+				if (this.childModelsAnimated != null)
+				{
+					for (int i = 0; i < this.childModelsAnimated.size(); ++i)
 					{
-						GlStateManager.callList(this.displayList);
-
-						if (this.childModels != null)
-						{
-							for (int k = 0; k < this.childModels.size(); ++k)
-							{
-								((ModelRenderer) this.childModels.get(k)).render(scale);
-							}
-						}
-					}
-					else
-					{
-						GlStateManager.translate(this.rotationPointX * scale, this.rotationPointY * scale,
-								this.rotationPointZ * scale);
-						GlStateManager.callList(this.displayList);
-
-						if (this.childModels != null)
-						{
-							for (int j = 0; j < this.childModels.size(); ++j)
-							{
-								((ModelRenderer) this.childModels.get(j)).render(scale);
-							}
-						}
-
-						GlStateManager.translate(-this.rotationPointX * scale, -this.rotationPointY * scale,
-								-this.rotationPointZ * scale);
+						this.childModelsAnimated.get(i).render(scale);
 					}
 				}
-				else
-				{
-					GlStateManager.pushMatrix();
-					GlStateManager.translate(((rotationPointX + positionOffsetX) / 16F), ((rotationPointY - positionOffsetY) / 16F),
-							((rotationPointZ + positionOffsetZ) / 16F));
 
-					if (this.rotateAngleZ != 0.0F)
-					{
-						GlStateManager.rotate(this.rotateAngleZ * (180F / (float) Math.PI), 0.0F, 0.0F, 1.0F);
-					}
-
-					if (this.rotateAngleY != 0.0F)
-					{
-						GlStateManager.rotate(this.rotateAngleY * (180F / (float) Math.PI), 0.0F, 1.0F, 0.0F);
-					}
-
-					if (this.rotateAngleX != 0.0F)
-					{
-						GlStateManager.rotate(this.rotateAngleX * (180F / (float) Math.PI), 1.0F, 0.0F, 0.0F);
-					}
-
-					GlStateManager.callList(this.displayList);
-
-					if (this.childModels != null)
-					{
-						for (int i = 0; i < this.childModels.size(); ++i)
-						{
-							((ModelRenderer) this.childModels.get(i)).render(scale);
-						}
-					}
-
-					GlStateManager.popMatrix();
-				}
+				GlStateManager.popMatrix();
 
 				GlStateManager.translate(-this.offsetX, -this.offsetY, -this.offsetZ);
 			}

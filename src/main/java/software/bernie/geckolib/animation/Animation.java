@@ -18,6 +18,6 @@ public class Animation
 	public String animationName;
 	public double animationLength;
 	public boolean loop = true;
-	public List<BoneAnimation> boneAnimations;
+	public List<BoneAnimation> boneAnimations = new ArrayList<>();
 	public List<EventKeyFrame> soundKeyFrames = new ArrayList<>();
 }

@@ -16,8 +16,10 @@ import net.minecraftforge.fml.common.registry.EntityEntryBuilder;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import software.bernie.geckolib.example.client.renderer.entity.AscendedLegfishRenderer;
+import software.bernie.geckolib.example.client.renderer.entity.BrownRenderer;
 import software.bernie.geckolib.example.client.renderer.entity.StingrayRenderer;
 import software.bernie.geckolib.example.entity.AscendedLegfishEntity;
+import software.bernie.geckolib.example.entity.BrownEntity;
 import software.bernie.geckolib.example.entity.StingrayTestEntity;
 import software.bernie.geckolib.example.entity.TigrisEntity;
 import software.bernie.geckolib.example.client.renderer.entity.TigrisRenderer;
@@ -34,10 +36,13 @@ public class ModEventBus
 		event.getRegistry().register(EntityEntryBuilder.create().entity(StingrayTestEntity.class).name("stingray").id(new ResourceLocation(GeckoLib.ModID, "stingray"), id++).tracker(160, 2, false).build());
 		event.getRegistry().register(EntityEntryBuilder.create().entity(AscendedLegfishEntity.class).name("ascended_legfish").id(new ResourceLocation(GeckoLib.ModID, "ascended_legfish"), id++).tracker(160, 2, false).build());
 		event.getRegistry().register(EntityEntryBuilder.create().entity(TigrisEntity.class).name("ascended_legfish").id(new ResourceLocation(GeckoLib.ModID, "tigris"), id++).tracker(160, 2, false).build());
+		event.getRegistry().register(EntityEntryBuilder.create().entity(BrownEntity.class).name("brown").id(new ResourceLocation(GeckoLib.ModID, "brown"), id++).tracker(160, 2, false).build());
 
 		RenderingRegistry.registerEntityRenderingHandler(StingrayTestEntity.class, StingrayRenderer::new);
 		RenderingRegistry.registerEntityRenderingHandler(AscendedLegfishEntity.class, AscendedLegfishRenderer::new);
 		RenderingRegistry.registerEntityRenderingHandler(TigrisEntity.class, TigrisRenderer::new);
+		RenderingRegistry.registerEntityRenderingHandler(BrownEntity.class, BrownRenderer::new);
+
 
 	}
 }
