@@ -1,23 +1,26 @@
-/*
- * Copyright (c) 2020.
- * Author: Bernie G. (Gecko)
- */
-
 package software.bernie.geckolib.example.entity;
 
-import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.world.World;
-import software.bernie.geckolib.animation.AnimationBuilder;
-import software.bernie.geckolib.animation.AnimationTestEvent;
-import software.bernie.geckolib.animation.model.AnimationController;
-import software.bernie.geckolib.animation.model.AnimationControllerCollection;
+import software.bernie.geckolib.animation.builder.AnimationBuilder;
+import software.bernie.geckolib.animation.controller.AnimationController;
+import software.bernie.geckolib.animation.controller.EntityAnimationController;
 import software.bernie.geckolib.entity.IAnimatedEntity;
+import software.bernie.geckolib.event.AnimationTestEvent;
+import software.bernie.geckolib.manager.EntityAnimationManager;
 
-public class BrownEntity extends EntityMob implements IAnimatedEntity
+public class BrownEntity extends EntityAnimal implements IAnimatedEntity
 {
-	public AnimationControllerCollection animationControllers = new AnimationControllerCollection();
-	private AnimationController animationController = new AnimationController(this, "animationController", 20,
-			this::animationPredicate);
+	EntityAnimationManager manager = new EntityAnimationManager();
+	AnimationController controller = new EntityAnimationController(this, "controller", 30, this::predicate);
+
+	private <ENTITY extends Entity> boolean predicate(AnimationTestEvent<ENTITY> event)
+	{
+		controller.setAnimation(new AnimationBuilder().addAnimation("crawling", true));
+		return true;
+	}
 
 	public BrownEntity(World worldIn)
 	{
@@ -25,30 +28,24 @@ public class BrownEntity extends EntityMob implements IAnimatedEntity
 		registerAnimationControllers();
 	}
 
-	@Override
-	public AnimationControllerCollection getAnimationControllers()
-	{
-		return animationControllers;
-	}
-
-
 	public void registerAnimationControllers()
 	{
 		if (world.isRemote)
 		{
-			animationController.setAnimation(new AnimationBuilder().addAnimation("running"));
-			this.animationControllers.addAnimationController(animationController);
+			controller.setAnimation(new AnimationBuilder().addAnimation("running"));
+			this.manager.addAnimationController(controller);
 		}
 	}
 
-	public boolean animationPredicate(AnimationTestEvent event)
+	@Override
+	public EntityAnimationManager getAnimationManager()
 	{
-
-		animationController.transitionLength = 40;
-		animationController.setAnimation(new AnimationBuilder().addAnimation("running", true));
-
-		return true;
+		return manager;
 	}
 
-
+	@Override
+	public EntityAgeable createChild(EntityAgeable ageable)
+	{
+		return null;
+	}
 }

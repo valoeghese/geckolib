@@ -8,29 +8,29 @@ package software.bernie.geckolib.example.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.world.World;
-import software.bernie.geckolib.animation.model.AnimationController;
-import software.bernie.geckolib.animation.model.AnimationControllerCollection;
+import software.bernie.geckolib.animation.builder.AnimationBuilder;
+import software.bernie.geckolib.animation.controller.AnimationController;
+import software.bernie.geckolib.animation.controller.EntityAnimationController;
 import software.bernie.geckolib.entity.IAnimatedEntity;
-import software.bernie.geckolib.animation.*;
+import software.bernie.geckolib.event.AnimationTestEvent;
+import software.bernie.geckolib.manager.EntityAnimationManager;
 
 public class StingrayTestEntity extends EntityMob implements IAnimatedEntity
 {
-	public AnimationControllerCollection animationControllers = new AnimationControllerCollection();
-	private AnimationController wingController = new AnimationController(this, "wingController", 1, this::wingAnimationPredicate);
+	public EntityAnimationManager animationControllers = new EntityAnimationManager();
+	private AnimationController wingController = new EntityAnimationController(this, "wingController", 1, this::wingAnimationPredicate);
+
+	@Override
+	public EntityAnimationManager getAnimationManager()
+	{
+		return animationControllers;
+	}
 
 	public StingrayTestEntity(World worldIn)
 	{
 		super(worldIn);
 		registerAnimationControllers();
 	}
-
-	@Override
-	public AnimationControllerCollection getAnimationControllers()
-	{
-		return animationControllers;
-	}
-
-
 
 	public void registerAnimationControllers()
 	{
@@ -41,17 +41,17 @@ public class StingrayTestEntity extends EntityMob implements IAnimatedEntity
 		}
 	}
 
-	public boolean wingAnimationPredicate(AnimationTestEvent event)
+	public boolean wingAnimationPredicate(AnimationTestEvent<? extends Entity> event)
 	{
 		Entity entity = event.getEntity();
 		World entityWorld = entity.getEntityWorld();
 		if(entityWorld.rainingStrength > 0)
 		{
-			wingController.transitionLength = 40;
+			wingController.transitionLengthTicks = 40;
 			wingController.setAnimation(new AnimationBuilder().addAnimation("thirdAnimation"));
 		}
 		else {
-			wingController.transitionLength = 40;
+			wingController.transitionLengthTicks = 40;
 			wingController.setAnimation(new AnimationBuilder().addAnimation("secondAnimation"));
 		}
 		return true;

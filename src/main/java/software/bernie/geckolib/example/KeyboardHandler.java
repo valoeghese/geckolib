@@ -12,7 +12,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
-@Mod.EventBusSubscriber(Side.CLIENT)
+@Mod.EventBusSubscriber(value = Side.CLIENT)
 public class KeyboardHandler
 {
 	public static boolean isForwardKeyDown = false;
@@ -28,7 +28,6 @@ public class KeyboardHandler
 			isForwardKeyDown = mc.gameSettings.keyBindForward.isKeyDown();
 			isBackKeyDown = mc.gameSettings.keyBindBack.isKeyDown();
 			isQDown = mc.gameSettings.keyBindDrop.isKeyDown();
-
 		}
 	}
 }

@@ -5,35 +5,58 @@
 
 package software.bernie.geckolib.animation.model;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.resources.IReloadableResourceManager;
+import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.resources.IResourceManagerReloadListener;
+import net.minecraft.client.resources.SimpleResource;
 import net.minecraft.client.util.JsonException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import software.bernie.geckolib.GeckoLib;
+import software.bernie.geckolib.animation.builder.Animation;
+import software.bernie.geckolib.animation.controller.AnimationController;
 import software.bernie.geckolib.animation.keyframe.AnimationPoint;
+import software.bernie.geckolib.animation.keyframe.BoneAnimationQueue;
+import software.bernie.geckolib.animation.render.AnimatedModelRenderer;
+import software.bernie.geckolib.animation.snapshot.BoneSnapshot;
+import software.bernie.geckolib.animation.snapshot.BoneSnapshotCollection;
+import software.bernie.geckolib.animation.snapshot.DirtyTracker;
+import software.bernie.geckolib.animation.snapshot.EntityDirtyTracker;
 import software.bernie.geckolib.entity.IAnimatedEntity;
-import software.bernie.geckolib.animation.*;
-import software.bernie.geckolib.file.AnimationFileManager;
-import software.bernie.geckolib.json.JSONAnimationUtils;
+import software.bernie.geckolib.event.AnimationTestEvent;
+import software.bernie.geckolib.manager.EntityAnimationManager;
+import software.bernie.geckolib.reload.ReloadManager;
+import software.bernie.geckolib.util.AnimationUtils;
+import software.bernie.geckolib.util.json.JsonAnimationUtils;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.List;
 
 /**
  * An AnimatedEntityModel is the equivalent of an Entity Model, except it provides extra functionality for rendering animations from bedrock json animation files. The entity passed into the generic parameter needs to implement IAnimatedEntity.
  *
  * @param <T> the type parameter
  */
-public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> extends ModelBase
+public abstract class AnimatedEntityModel<T extends EntityLivingBase & IAnimatedEntity> extends ModelBase implements IResourceManagerReloadListener
 {
 	private JsonObject animationFile;
-	private AnimationFileManager animationFileManager;
 	private List<AnimatedModelRenderer> modelRendererList = new ArrayList();
 	private HashMap<String, Animation> animationList = new HashMap();
 	public List<AnimatedModelRenderer> rootBones = new ArrayList<>();
+	public double seekTime;
+	public double lastGameTickTime;
+
 	/**
 	 * This resource location needs to point to a json file of your animation file, i.e. "geckolib:animations/frog_animation.json"
 	 *
@@ -46,35 +69,58 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 	 */
 	public boolean loopByDefault = false;
 
+
 	/**
 	 * Instantiates a new Animated entity model and loads the current animation file.
 	 */
-	public AnimatedEntityModel()
+	protected AnimatedEntityModel()
 	{
 		super();
+		ReloadManager.registerModel(this);
+		IReloadableResourceManager resourceManager = (IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager();
+		//resourceManager.addReloadListener(this);
+		onResourceManagerReload(resourceManager);
+	}
+
+
+	/**
+	 * Internal method for handling reloads of animation files. Do not override.
+	 */
+	@Override
+	public void onResourceManagerReload(IResourceManager resourceManager)
+	{
 		try
 		{
-			animationFileManager = new AnimationFileManager(getAnimationFileLocation());
-			setAnimationFile(animationFileManager.loadAnimationFile());
+			Gson GSON = new Gson();
+			SimpleResource resource = (SimpleResource) resourceManager.getResource(getAnimationFileLocation());
+			InputStreamReader stream = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
+			Reader reader = new BufferedReader(
+					stream);
+			JsonObject jsonobject = JsonUtils.fromJson(GSON, reader, JsonObject.class);
+			resource.close();
+			stream.close();
+			setAnimationFile(jsonobject);
 			loadAllAnimations();
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
-			GeckoLib.LOGGER.error("Encountered error while loading initial animations.", e);
+			GeckoLib.LOGGER.error("Encountered error while loading animations.", e);
+			throw new RuntimeException(e);
 		}
 	}
 
 	private void loadAllAnimations()
 	{
-		Set<Map.Entry<String, JsonElement>> entrySet = JSONAnimationUtils.getAnimations(getAnimationFile());
+		animationList.clear();
+		Set<Map.Entry<String, JsonElement>> entrySet = JsonAnimationUtils.getAnimations(getAnimationFile());
 		for (Map.Entry<String, JsonElement> entry : entrySet)
 		{
 			String animationName = entry.getKey();
 			Animation animation = null;
 			try
 			{
-				animation = JSONAnimationUtils.deserializeJsonToAnimation(
-						JSONAnimationUtils.getAnimation(getAnimationFile(), animationName));
+				animation = JsonAnimationUtils.deserializeJsonToAnimation(
+						JsonAnimationUtils.getAnimation(getAnimationFile(), animationName));
 				if (loopByDefault)
 				{
 					animation.loop = true;
@@ -83,6 +129,7 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 			catch (JsonException e)
 			{
 				GeckoLib.LOGGER.error("Could not load animation: " + animationName, e);
+				throw new RuntimeException(e);
 			}
 			animationList.put(animationName, animation);
 		}
@@ -107,17 +154,6 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 	{
 		this.animationFile = animationFile;
 	}
-
-	/**
-	 * Gets the animation file manager for this model.
-	 *
-	 * @return the animation file manager
-	 */
-	public AnimationFileManager getAnimationFileManager()
-	{
-		return animationFileManager;
-	}
-
 
 	/**
 	 * Gets a bone by name.
@@ -151,7 +187,7 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 	 */
 	public Map.Entry<String, JsonElement> getAnimationByName(String name) throws JsonException
 	{
-		return JSONAnimationUtils.getAnimation(getAnimationFile(), name);
+		return JsonAnimationUtils.getAnimation(getAnimationFile(), name);
 	}
 
 
@@ -170,34 +206,40 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 		modelRenderer.rotateAngleZ = z;
 	}
 
-
 	@Override
 	public void setLivingAnimations(EntityLivingBase entityIn, float limbSwing, float limbSwingAmount, float partialTick)
 	{
 		T entity = (T) entityIn;
+
 		// Keeps track of which bones have had animations applied to them, and eventually sets the ones that don't have an animation to their default values
 		EntityDirtyTracker modelTracker = createNewDirtyTracker();
 
 		// Adding partial tick to smooth out the animation
-		double tick = entity.ticksExisted + partialTick;
 
-		// Each animation has it's own collection of animations (called the AnimationControllerCollection), which allows for multiple independent animations
-		AnimationControllerCollection controllers = entity.getAnimationControllers();
+		// Each animation has it's own collection of animations (called the EntityAnimationManager), which allows for multiple independent animations
+		EntityAnimationManager manager = entity.getAnimationManager();
+
+		manager.tick = entity.ticksExisted + partialTick;
+		double gameTick = manager.tick;
+		double deltaTicks = gameTick - lastGameTickTime;
+		seekTime += manager.getCurrentAnimationSpeed() * deltaTicks;
+		lastGameTickTime = gameTick;
 
 		// Store the current value of each bone rotation/position/scale
-		if(controllers.boneSnapshotCollection.isEmpty())
+		if (manager.getBoneSnapshotCollection().isEmpty())
 		{
-			controllers.boneSnapshotCollection = createNewBoneSnapshotCollection();
+			manager.setBoneSnapshotCollection(createNewBoneSnapshotCollection());
 		}
-		BoneSnapshotCollection boneSnapshots = controllers.boneSnapshotCollection;
+		BoneSnapshotCollection boneSnapshots = manager.getBoneSnapshotCollection();
 
-		for (AnimationController<T> controller : controllers.values())
+		for (AnimationController<T> controller : manager.values())
 		{
 
-			AnimationTestEvent<T> animationTestEvent = new AnimationTestEvent<T>(entity, tick, limbSwing, limbSwingAmount, partialTick, controller);
-
+			AnimationTestEvent<T> animationTestEvent = new AnimationTestEvent<T>(entity, seekTime, limbSwing,
+					limbSwingAmount, partialTick, controller, !(limbSwingAmount > -0.15F && limbSwingAmount < 0.15F));
+			controller.isJustStarting = manager.isFirstTick;
 			// Process animations and add new values to the point queues
-			controller.process(tick, animationTestEvent, modelRendererList, boneSnapshots);
+			controller.process(seekTime, animationTestEvent, modelRendererList, boneSnapshots);
 
 			// Loop through every single bone and lerp each property
 			for (BoneAnimationQueue boneAnimation : controller.getBoneAnimationQueues().values())
@@ -221,84 +263,141 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 				// If there's any rotation points for this bone
 				if (rXPoint != null && rYPoint != null && rZPoint != null)
 				{
-					bone.rotateAngleX = AnimationUtils.lerpValues(rXPoint) + initialSnapshot.rotationValueX;
-					bone.rotateAngleY = AnimationUtils.lerpValues(rYPoint) + initialSnapshot.rotationValueY;
-					bone.rotateAngleZ = AnimationUtils.lerpValues(rZPoint) + initialSnapshot.rotationValueZ;
+					bone.rotateAngleX = AnimationUtils.lerpValues(rXPoint, controller.easingType,
+							controller.customEasingMethod) + initialSnapshot.rotationValueX;
+					bone.rotateAngleY = AnimationUtils.lerpValues(rYPoint, controller.easingType,
+							controller.customEasingMethod) + initialSnapshot.rotationValueY;
+					bone.rotateAngleZ = AnimationUtils.lerpValues(rZPoint, controller.easingType,
+							controller.customEasingMethod) + initialSnapshot.rotationValueZ;
 					snapshot.rotationValueX = bone.rotateAngleX;
 					snapshot.rotationValueY = bone.rotateAngleY;
 					snapshot.rotationValueZ = bone.rotateAngleZ;
+					snapshot.isCurrentlyRunningRotationAnimation = true;
 
 					modelTracker.get(bone).hasRotationChanged = true;
 				}
 				// If there's any position points for this bone
 				if (pXPoint != null && pYPoint != null && pZPoint != null)
 				{
-					bone.positionOffsetX = AnimationUtils.lerpValues(pXPoint);
-					bone.positionOffsetY = AnimationUtils.lerpValues(pYPoint);
-					bone.positionOffsetZ = AnimationUtils.lerpValues(pZPoint);
+					bone.positionOffsetX = AnimationUtils.lerpValues(pXPoint, controller.easingType,
+							controller.customEasingMethod);
+					bone.positionOffsetY = AnimationUtils.lerpValues(pYPoint, controller.easingType,
+							controller.customEasingMethod);
+					bone.positionOffsetZ = AnimationUtils.lerpValues(pZPoint, controller.easingType,
+							controller.customEasingMethod);
 					snapshot.positionOffsetX = bone.positionOffsetX;
 					snapshot.positionOffsetY = bone.positionOffsetY;
 					snapshot.positionOffsetZ = bone.positionOffsetZ;
+					snapshot.isCurrentlyRunningPositionAnimation = true;
+
 					modelTracker.get(bone).hasPositionChanged = true;
 				}
 
 				// If there's any scale points for this bone
 				if (sXPoint != null && sYPoint != null && sZPoint != null)
 				{
-					bone.scaleValueX = AnimationUtils.lerpValues(sXPoint);
-					bone.scaleValueY = AnimationUtils.lerpValues(sYPoint);
-					bone.scaleValueZ = AnimationUtils.lerpValues(sZPoint);
+					bone.scaleValueX = AnimationUtils.lerpValues(sXPoint, controller.easingType,
+							controller.customEasingMethod);
+					bone.scaleValueY = AnimationUtils.lerpValues(sYPoint, controller.easingType,
+							controller.customEasingMethod);
+					bone.scaleValueZ = AnimationUtils.lerpValues(sZPoint, controller.easingType,
+							controller.customEasingMethod);
 					snapshot.scaleValueX = bone.scaleValueX;
 					snapshot.scaleValueY = bone.scaleValueY;
 					snapshot.scaleValueZ = bone.scaleValueZ;
+					snapshot.isCurrentlyRunningScaleAnimation = true;
+
 					modelTracker.get(bone).hasScaleChanged = true;
 				}
 			}
 		}
 
+		double resetTickLength = manager.getResetSpeed();
 		for (DirtyTracker tracker : modelTracker)
 		{
 			AnimatedModelRenderer model = tracker.model;
 			BoneSnapshot initialSnapshot = model.getInitialSnapshot();
 			BoneSnapshot saveSnapshot = boneSnapshots.get(tracker.model.name);
+
 			if (!tracker.hasRotationChanged)
 			{
-				model.rotateAngleX = lerpConstant(saveSnapshot.rotationValueX, initialSnapshot.rotationValueX, 0.02);
-				model.rotateAngleY = lerpConstant(saveSnapshot.rotationValueY, initialSnapshot.rotationValueY, 0.02);
-				model.rotateAngleZ = lerpConstant(saveSnapshot.rotationValueZ, initialSnapshot.rotationValueZ, 0.02);
-				saveSnapshot.rotationValueX = model.rotateAngleX;
-				saveSnapshot.rotationValueY = model.rotateAngleY;
-				saveSnapshot.rotationValueZ = model.rotateAngleZ;
+				if (saveSnapshot.isCurrentlyRunningRotationAnimation)
+				{
+					saveSnapshot.mostRecentResetRotationTick = (float) seekTime;
+					saveSnapshot.isCurrentlyRunningRotationAnimation = false;
+				}
+
+				double percentageReset = Math.min((seekTime - saveSnapshot.mostRecentResetRotationTick) / resetTickLength, 1);
+
+				model.rotateAngleX = AnimationUtils.lerpValues(percentageReset, saveSnapshot.rotationValueX,
+						initialSnapshot.rotationValueX);
+				model.rotateAngleY = AnimationUtils.lerpValues(percentageReset, saveSnapshot.rotationValueY,
+						initialSnapshot.rotationValueY);
+				model.rotateAngleZ = AnimationUtils.lerpValues(percentageReset, saveSnapshot.rotationValueZ,
+						initialSnapshot.rotationValueZ);
+				if(percentageReset >= 1)
+				{
+					saveSnapshot.rotationValueX = model.rotateAngleX;
+					saveSnapshot.rotationValueY = model.rotateAngleY;
+					saveSnapshot.rotationValueZ = model.rotateAngleZ;
+				}
 			}
 			if (!tracker.hasPositionChanged)
 			{
-				model.positionOffsetX = lerpConstant(saveSnapshot.positionOffsetX, initialSnapshot.positionOffsetX, 0.02);
-				model.positionOffsetY = lerpConstant(saveSnapshot.positionOffsetY, initialSnapshot.positionOffsetY, 0.02);
-				model.positionOffsetZ = lerpConstant(saveSnapshot.positionOffsetZ, initialSnapshot.positionOffsetZ, 0.02);
-				saveSnapshot.positionOffsetX = model.positionOffsetX;
-				saveSnapshot.positionOffsetY = model.positionOffsetY;
-				saveSnapshot.positionOffsetZ = model.positionOffsetZ;
+				if (saveSnapshot.isCurrentlyRunningPositionAnimation)
+				{
+					saveSnapshot.mostRecentResetPositionTick = (float) seekTime;
+					saveSnapshot.isCurrentlyRunningPositionAnimation = false;
+				}
+
+				double percentageReset = Math.min((seekTime - saveSnapshot.mostRecentResetPositionTick) / resetTickLength, 1);
+
+				model.positionOffsetX = AnimationUtils.lerpValues(percentageReset, saveSnapshot.positionOffsetX,
+						initialSnapshot.positionOffsetX);
+				model.positionOffsetY = AnimationUtils.lerpValues(percentageReset, saveSnapshot.positionOffsetY,
+						initialSnapshot.positionOffsetY);
+				model.positionOffsetZ = AnimationUtils.lerpValues(percentageReset, saveSnapshot.positionOffsetZ,
+						initialSnapshot.positionOffsetZ);
+
+				if(percentageReset >= 1)
+				{
+					saveSnapshot.positionOffsetX = model.positionOffsetX;
+					saveSnapshot.positionOffsetY = model.positionOffsetY;
+					saveSnapshot.positionOffsetZ = model.positionOffsetZ;
+				}
 			}
 			if (!tracker.hasScaleChanged)
 			{
-				model.scaleValueX = lerpConstant(saveSnapshot.scaleValueX, initialSnapshot.scaleValueX, 0.02);
-				model.scaleValueY = lerpConstant(saveSnapshot.scaleValueY, initialSnapshot.scaleValueY, 0.02);
-				model.scaleValueZ = lerpConstant(saveSnapshot.scaleValueZ, initialSnapshot.scaleValueZ, 0.02);
-				if(model.name.equals("teeth2"))
+				if (saveSnapshot.isCurrentlyRunningScaleAnimation)
 				{
-					//model.scaleValueY = 0.3f;
+					saveSnapshot.mostRecentResetScaleTick = (float) seekTime;
+					saveSnapshot.isCurrentlyRunningScaleAnimation = false;
 				}
-				saveSnapshot.scaleValueX = model.scaleValueX;
-				saveSnapshot.scaleValueY = model.scaleValueY;
-				saveSnapshot.scaleValueZ = model.scaleValueZ;
+
+				double percentageReset = Math.min((seekTime - saveSnapshot.mostRecentResetScaleTick) / resetTickLength, 1);
+
+				model.scaleValueX = AnimationUtils.lerpValues(percentageReset, saveSnapshot.scaleValueX,
+						initialSnapshot.scaleValueX);
+				model.scaleValueY = AnimationUtils.lerpValues(percentageReset, saveSnapshot.scaleValueY,
+						initialSnapshot.scaleValueY);
+				model.scaleValueZ = AnimationUtils.lerpValues(percentageReset, saveSnapshot.scaleValueZ,
+						initialSnapshot.scaleValueZ);
+
+				if(percentageReset >= 1)
+				{
+					saveSnapshot.scaleValueX = model.scaleValueX;
+					saveSnapshot.scaleValueY = model.scaleValueY;
+					saveSnapshot.scaleValueZ = model.scaleValueZ;
+				}
 			}
 		}
+		manager.isFirstTick = false;
 	}
 
 	private EntityDirtyTracker createNewDirtyTracker()
 	{
 		EntityDirtyTracker tracker = new EntityDirtyTracker();
-		for(AnimatedModelRenderer bone : modelRendererList)
+		for (AnimatedModelRenderer bone : modelRendererList)
 		{
 			tracker.add(new DirtyTracker(false, false, false, bone));
 		}
@@ -308,11 +407,16 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 	private BoneSnapshotCollection createNewBoneSnapshotCollection()
 	{
 		BoneSnapshotCollection collection = new BoneSnapshotCollection();
-		for(AnimatedModelRenderer bone : modelRendererList)
+		for (AnimatedModelRenderer bone : modelRendererList)
 		{
 			collection.put(bone.name, new BoneSnapshot(bone.getInitialSnapshot()));
 		}
 		return collection;
+	}
+
+	@Override
+	public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn)
+	{
 	}
 
 	/**
@@ -326,34 +430,12 @@ public abstract class AnimatedEntityModel<T extends Entity & IAnimatedEntity> ex
 		return animationList.get(name);
 	}
 
-	private static float lerpConstant(double currentValue, double finalValue, double speedModifier)
-	{
-		double lowerBound = finalValue - speedModifier;
-		double upperBound = finalValue + speedModifier;
-
-		if(lowerBound <= currentValue && upperBound >= currentValue)
-		{
-			return (float) currentValue;
-		}
-		double increment = 0;
-		if(currentValue < finalValue)
-		{
-			increment = speedModifier;
-		}
-		else {
-			increment = -1 * speedModifier;
-		}
-
-		return (float) (currentValue + increment);
-	}
-
 	@Override
 	public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale)
 	{
-		for(AnimatedModelRenderer model : rootBones)
+		for (AnimatedModelRenderer model : rootBones)
 		{
 			model.render(scale);
 		}
 	}
-
 }
