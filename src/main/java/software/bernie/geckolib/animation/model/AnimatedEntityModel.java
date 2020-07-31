@@ -364,7 +364,7 @@ public abstract class AnimatedEntityModel<T extends EntityLivingBase & IAnimated
 					saveSnapshot.positionOffsetX = model.positionOffsetX;
 					saveSnapshot.positionOffsetY = model.positionOffsetY;
 					saveSnapshot.positionOffsetZ = model.positionOffsetZ;
-				}  
+				}
 			}
 			if (!tracker.hasScaleChanged)
 			{
