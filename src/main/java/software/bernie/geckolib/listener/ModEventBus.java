@@ -26,24 +26,22 @@ public class ModEventBus
 {
 	static int id = 50;
 
-	@SideOnly(Side.CLIENT)
 	@SubscribeEvent
-	public static void registerRenderers(RegistryEvent.Register<EntityEntry> event)
+	public static void registerEntities(RegistryEvent.Register<EntityEntry> event)
 	{
 		event.getRegistry().register(EntityEntryBuilder.create().entity(StingrayTestEntity.class).name("stingray").id(new ResourceLocation(GeckoLib.ModID, "stingray"), id++).tracker(160, 2, false).build());
 		event.getRegistry().register(EntityEntryBuilder.create().entity(AscendedLegfishEntity.class).name("ascended_legfish").id(new ResourceLocation(GeckoLib.ModID, "ascended_legfish"), id++).tracker(160, 2, false).build());
 		event.getRegistry().register(EntityEntryBuilder.create().entity(BrownEntity.class).name("brown").id(new ResourceLocation(GeckoLib.ModID, "brown"), id++).tracker(160, 2, false).build());
 		event.getRegistry().register(EntityEntryBuilder.create().entity(RobotEntity.class).name("robot").id(new ResourceLocation(GeckoLib.ModID, "robot"), id++).tracker(160, 2, false).build());
-
 	}
 
+	@SideOnly(Side.CLIENT)
 	@SubscribeEvent
-	public static void doClientStuff(RegistryEvent.Register<EntityEntry> event)
+	public static void registerRenderers(RegistryEvent.Register<EntityEntry> event)
 	{
 		RenderingRegistry.registerEntityRenderingHandler(StingrayTestEntity.class, StingrayRenderer::new);
 		RenderingRegistry.registerEntityRenderingHandler(AscendedLegfishEntity.class, AscendedLegfishRenderer::new);
 		RenderingRegistry.registerEntityRenderingHandler(BrownEntity.class, BrownRenderer::new);
 		RenderingRegistry.registerEntityRenderingHandler(RobotEntity.class, RobotRenderer::new);
-
 	}
 }
