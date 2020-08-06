@@ -5,7 +5,7 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ 1.15, develop ]
+    branches: [ 1.12, 1.15, develop ]
   pull_request:
     branches: []
 
@@ -63,6 +63,7 @@ jobs:
         path: build/libs/geckolib-1.15-1.0.0.jar
     - name: Deploy Docs to AWS S3
       uses: jakejarvis/s3-sync-action@master
+      if: ${{ github.ref == 'refs/heads/1.15' }}
       with:
         args: --acl public-read --follow-symlinks --delete
       env:
