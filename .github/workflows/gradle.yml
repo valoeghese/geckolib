@@ -37,7 +37,7 @@ jobs:
         cd ./build/reports/tests
         zip -r "$OLDWD/reports.zip" test
     - name: Zip Docs
-      if: ${{ always() }}
+      if: ${{ github.ref == 'refs/heads/1.15' }}
       run: |
         set -x
         OLDWD=`pwd`
@@ -51,7 +51,7 @@ jobs:
         path: reports.zip
     - name: Upload Docs
       uses: actions/upload-artifact@v2
-      if: ${{ always() }}
+      if: ${{ github.ref == 'refs/heads/1.15' }}
       with:
         name: docs.zip
         path: docs.zip
