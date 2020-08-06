@@ -24,10 +24,20 @@ jobs:
       run: chmod +x gradlew
     - name: Assemble with Gradle
       run: ./gradlew --info assemble
+      env:
+        repsyUsername: ${{ secrets.repsyUsername }}
+        repsyPassword: ${{ secrets.repsyPassword }}
     - name: Test with Gradle
       run: ./gradlew --info test
+      env:
+        repsyUsername: ${{ secrets.repsyUsername }}
+        repsyPassword: ${{ secrets.repsyPassword }}
     - name: Docs with Gradle
       run: ./gradlew --info javadoc
+      if: ${{ github.ref == 'refs/heads/1.15' }}
+      env:
+        repsyUsername: ${{ secrets.repsyUsername }}
+        repsyPassword: ${{ secrets.repsyPassword }}
     - name: Zip Test Results
       if: ${{ always() }}
       run: |
