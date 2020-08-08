@@ -11,7 +11,7 @@ We use jitpack for publishing as it provides easy access to releases and allows 
 Please see the [Getting Started guide](https://github.com/bernie-g/geckolib/wiki/Getting-Started#getting-started) for detailed installation instructions per modding framework.
 
 ## Documentation
-GeckoLib provides detailed documentation in the form of a [Wiki](https://github.com/bernie-g/geckolib/wiki) and [Javadocs](http://geckolib.bernie.software/javadocs/). GeckoLib is currently available for Forge 1.12 and 1.15 and Fabric 1.15 and 1.16.
+GeckoLib provides detailed documentation in the form of a [Wiki](https://github.com/bernie-g/geckolib/wiki) and [Javadocs](http://geckolib.bernie.software/javadocs/). GeckoLib is currently available for Forge 1.12, 1.15, 1.16 and Fabric 1.15 and 1.16.
 
 ## Support
 If you have questions or need help getting up and running with questions, feel free to [join our discord](https://discord.gg/MNQcKxB)!
