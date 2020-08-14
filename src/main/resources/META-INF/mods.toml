@@ -24,9 +24,9 @@ displayURL="http://bernie.software/" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile="geckolib.png" #optional
 # A text field displayed in the mod UI
-credits="Thanks to The Ult1mate guy for the test models and animations, and Lukas and Commoble for the programming help." #optional
+credits="Thanks to The Ult1mate guy for the test models and animations, and Eliot for the plugin and core library help." #optional
 # A text field displayed in the mod UI
-authors="Gecko" #optional
+authors="Gecko, Eliot" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''
 Geckolib is an entity animation loader for Java Edition, which lets you export bedrock animations and play them automatically.'''
