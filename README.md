@@ -5,6 +5,7 @@ Geckolib is an entity animation loader for Java Edition, which lets you export b
 ## Installation
 [![curseforge](http://cf.way2muchnoise.eu/versions/geckolib.svg)](https://www.curseforge.com/minecraft/mc-mods/geckolib)
 ![Java CI with Gradle](https://github.com/bernie-g/geckolib/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=1.15)
+<a href="https://cla-assistant.io/bernie-g/geckolib"><img src="https://cla-assistant.io/readme/badge/bernie-g/geckolib" alt="CLA assistant" /></a>
 
 We use jitpack for publishing as it provides easy access to releases and allows for javadocs in the jars (unlike curseforge).
 
