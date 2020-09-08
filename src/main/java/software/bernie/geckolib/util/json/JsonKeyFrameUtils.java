@@ -8,6 +8,7 @@ package software.bernie.geckolib.util.json;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.apache.commons.lang3.math.NumberUtils;
 import software.bernie.geckolib.GeckoLib;
 import software.bernie.geckolib.animation.keyframe.KeyFrame;
 import software.bernie.geckolib.animation.keyframe.VectorKeyFrameList;
@@ -40,7 +41,7 @@ public class JsonKeyFrameUtils
 
 			double previousKeyFrameLocation = previousKeyFrame == null ? 0 : Double.parseDouble(
 					previousKeyFrame.getKey());
-			double currentKeyFrameLocation = Double.parseDouble(keyframe.getKey());
+			double currentKeyFrameLocation = NumberUtils.isCreatable(keyframe.getKey()) ? Double.parseDouble(keyframe.getKey()) : 0;
 			double animationTimeDifference = currentKeyFrameLocation - previousKeyFrameLocation;
 
 			JsonArray vectorJsonArray = getKeyFrameVector(keyframe.getValue());
