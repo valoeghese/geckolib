@@ -14,7 +14,6 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -31,7 +30,6 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
-import software.bernie.geckolib3.util.GeoArmorRendererFactory;
 import software.bernie.geckolib3.util.GeoUtils;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -50,8 +48,6 @@ public class GeoArmorRenderer<T extends ArmorItem & IAnimatable> implements IGeo
 
 	protected AnimatedGeoModel<T> modelProvider;
 	protected ItemStack currentItemStack;
-
-
 
 	// Set these to the names of your armor's bones, or null if you aren't using
 	// them
@@ -79,13 +75,13 @@ public class GeoArmorRenderer<T extends ArmorItem & IAnimatable> implements IGeo
 	}
 
 	public static <E extends Entity> void registerArmorRenderer(GeoArmorRenderer renderer, Item... items) {
-		for(Item item : items) {
+		for (Item item : items) {
 			registerArmorRenderer(renderer, item);
 		}
 	}
 
 	public static <E extends Entity> void registerArmorRenderer(GeoArmorRenderer renderer, Item item) {
-		if(item instanceof ArmorItem) {
+		if (item instanceof ArmorItem) {
 			renderers.put((Class<? extends ArmorItem>) item.getClass(), renderer);
 			ArmorRenderer.register(renderer, item);
 		}
@@ -99,13 +95,16 @@ public class GeoArmorRenderer<T extends ArmorItem & IAnimatable> implements IGeo
 		return renderer;
 	}
 
-
 	@Override
-	public void render(GeoModel model, T animatable, float partialTicks, RenderLayer type, MatrixStack matrixStackIn, VertexConsumerProvider renderTypeBuffer, VertexConsumer vertexBuilder, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-		IGeoRenderer.super.render(model, animatable, partialTicks, type, matrixStackIn, renderTypeBuffer, vertexBuilder, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+	public void render(GeoModel model, T animatable, float partialTicks, RenderLayer type, MatrixStack matrixStackIn,
+			VertexConsumerProvider renderTypeBuffer, VertexConsumer vertexBuilder, int packedLightIn,
+			int packedOverlayIn, float red, float green, float blue, float alpha) {
+		IGeoRenderer.super.render(model, animatable, partialTicks, type, matrixStackIn, renderTypeBuffer, vertexBuilder,
+				packedLightIn, packedOverlayIn, red, green, blue, alpha);
 	}
 
-	public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, ItemStack stack, LivingEntity entity, EquipmentSlot slot, int light, BipedEntityModel<LivingEntity> contextModel) {
+	public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, ItemStack stack,
+			LivingEntity entity, EquipmentSlot slot, int light, BipedEntityModel<LivingEntity> contextModel) {
 		setCurrentItem(entity, stack, slot, contextModel);
 		this.render(matrices, vertexConsumers, light);
 	}
@@ -115,7 +114,9 @@ public class GeoArmorRenderer<T extends ArmorItem & IAnimatable> implements IGeo
 		stack.scale(-1.0F, -1.0F, 1.0F);
 		GeoModel model = modelProvider.getModel(modelProvider.getModelLocation(currentArmorItem));
 
-		AnimationEvent<T> itemEvent = new AnimationEvent<T>(this.currentArmorItem, 0, 0, MinecraftClient.getInstance().getTickDelta(), false, Arrays.asList(this.itemStack, this.entityLiving, this.armorSlot));
+		AnimationEvent<T> itemEvent = new AnimationEvent<T>(this.currentArmorItem, 0, 0,
+				MinecraftClient.getInstance().getTickDelta(), false,
+				Arrays.asList(this.itemStack, this.entityLiving, this.armorSlot));
 		modelProvider.setLivingAnimations(currentArmorItem, this.getUniqueID(this.currentArmorItem), itemEvent);
 
 		this.fitToBiped();
@@ -125,8 +126,7 @@ public class GeoArmorRenderer<T extends ArmorItem & IAnimatable> implements IGeo
 		Color renderColor = getRenderColor(currentArmorItem, 0, stack, bufferIn, null, packedLightIn);
 		RenderLayer renderType = getRenderType(currentArmorItem, 0, stack, bufferIn, null, packedLightIn,
 				getTextureLocation(currentArmorItem));
-		render(model, currentArmorItem, 0, renderType, stack, bufferIn, null, packedLightIn,
-				OverlayTexture.DEFAULT_UV,
+		render(model, currentArmorItem, 0, renderType, stack, bufferIn, null, packedLightIn, OverlayTexture.DEFAULT_UV,
 				(float) renderColor.getRed() / 255f, (float) renderColor.getGreen() / 255f,
 				(float) renderColor.getBlue() / 255f, (float) renderColor.getAlpha() / 255);
 
@@ -191,7 +191,7 @@ public class GeoArmorRenderer<T extends ArmorItem & IAnimatable> implements IGeo
 				leftLegBone.setPositionY(12 - baseModel.leftLeg.pivotY);
 				leftLegBone.setPositionZ(baseModel.leftLeg.pivotZ);
 				if (this.leftBootBone != null) {
-					IBone leftBootBone = this.modelProvider.getBone(this.rightBootBone);
+					IBone leftBootBone = this.modelProvider.getBone(this.leftBootBone);
 					GeoUtils.copyRotations(baseModel.leftLeg, leftBootBone);
 					leftBootBone.setPositionX(baseModel.leftLeg.pivotX - 2);
 					leftBootBone.setPositionY(12 - baseModel.leftLeg.pivotY);
@@ -214,7 +214,8 @@ public class GeoArmorRenderer<T extends ArmorItem & IAnimatable> implements IGeo
 	/**
 	 * Everything after this point needs to be called every frame before rendering
 	 */
-	public GeoArmorRenderer<T> setCurrentItem(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot, BipedEntityModel model) {
+	public GeoArmorRenderer<T> setCurrentItem(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot,
+			BipedEntityModel model) {
 		this.entityLiving = entityLiving;
 		this.itemStack = itemStack;
 		this.armorSlot = armorSlot;

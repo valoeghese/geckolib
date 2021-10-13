@@ -1,5 +1,3 @@
-3.0.15
+3.0.16
 
-***PLEASE NOTE ARMOR IS STILL NOT FIXED***
-
-- Use remapped jars for publishing to maven - SizableShrimp 
+- Restored armor rendering - Waterpicker 
