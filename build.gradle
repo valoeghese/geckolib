@@ -59,7 +59,7 @@ dependencies {
     modCompileOnly ("vazkii.patchouli:Patchouli:1.17-55-FABRIC-SNAPSHOT") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-	//modCompileOnly 'curse.maven:RATS-431787:3360105'
+	implementation 'curse.maven:RATS-431787:3493949'
 
     // Actual dependencies
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0'
