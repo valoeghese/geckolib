@@ -59,7 +59,7 @@ dependencies {
     modCompileOnly ("vazkii.patchouli:Patchouli:1.17-55-FABRIC-SNAPSHOT") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-	implementation 'curse.maven:RATS-431787:3493949'
+	//implementation 'curse.maven:RATS-431787:3493949'
 
     // Actual dependencies
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0'
@@ -224,9 +224,7 @@ if (file('key.properties').exists()) {
         relations {
             requiredDependency 'fabric-api'      
         }
-        mainArtifact(remapJar) {
-      		displayName = "[FABRIC] Geckolib ${project.minecraft_version}"
-    	}
+        mainArtifact(remapJar)
 
         afterEvaluate {
             uploadTask.dependsOn("remapJar")
