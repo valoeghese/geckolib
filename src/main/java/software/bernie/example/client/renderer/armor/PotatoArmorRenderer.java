@@ -1,10 +1,8 @@
 package software.bernie.example.client.renderer.armor;
 
-import net.minecraft.client.render.entity.model.EntityModelLayer;
 import software.bernie.example.client.model.armor.PotatoArmorModel;
 import software.bernie.example.item.PotatoArmorItem;
 import software.bernie.geckolib3.renderers.geo.GeoArmorRenderer;
-import software.bernie.geckolib3.util.GeoArmorRendererFactory;
 
 public class PotatoArmorRenderer extends GeoArmorRenderer<PotatoArmorItem> {
 	public PotatoArmorRenderer() {
