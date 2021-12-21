@@ -15,6 +15,7 @@ import net.minecraft.entity.EntityType;
 import software.bernie.example.client.renderer.armor.PotatoArmorRenderer;
 import software.bernie.example.client.renderer.entity.BikeGeoRenderer;
 import software.bernie.example.client.renderer.entity.ExampleGeoRenderer;
+import software.bernie.example.client.renderer.entity.LERenderer;
 import software.bernie.example.client.renderer.entity.ReplacedCreeperRenderer;
 import software.bernie.example.client.renderer.item.JackInTheBoxRenderer;
 import software.bernie.example.client.renderer.item.PistolRender;
@@ -38,6 +39,8 @@ public class ClientListener implements ClientModInitializer {
 					(entityRenderDispatcher, context) -> new ExampleGeoRenderer(entityRenderDispatcher));
 			EntityRendererRegistry.INSTANCE.register(EntityRegistry.BIKE_ENTITY,
 					(entityRenderDispatcher, context) -> new BikeGeoRenderer(entityRenderDispatcher));
+			EntityRendererRegistry.INSTANCE.register(EntityRegistry.GEOLAYERENTITY,
+					(entityRenderDispatcher, context) -> new LERenderer(entityRenderDispatcher));
 			GeoItemRenderer.registerItemRenderer(ItemRegistry.JACK_IN_THE_BOX, new JackInTheBoxRenderer());
 			GeoItemRenderer.registerItemRenderer(ItemRegistry.PISTOL, new PistolRender());
 			GeoArmorRenderer.registerArmorRenderer(PotatoArmorItem.class, new PotatoArmorRenderer());
