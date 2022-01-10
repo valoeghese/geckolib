@@ -1,3 +1,4 @@
-3.0.30
+3.0.31
 
-- Core update
+- Updates Core
+- Makes Entity, Projectiles and Geo Replaced main methods public.
