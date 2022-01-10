@@ -61,7 +61,7 @@ public abstract class GeoEntityRenderer<T extends LivingEntity & IAnimatable> ex
 	public VertexConsumerProvider rtb;
 	public Identifier whTexture;
 
-	protected GeoEntityRenderer(EntityRenderDispatcher renderManager, AnimatedGeoModel<T> modelProvider) {
+	public GeoEntityRenderer(EntityRenderDispatcher renderManager, AnimatedGeoModel<T> modelProvider) {
 		super(renderManager);
 		this.modelProvider = modelProvider;
 	}
